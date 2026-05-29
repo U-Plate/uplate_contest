@@ -1,5 +1,5 @@
 {
-  "name": "uplate-nfc-cards",
+  "name": "uplate-contest",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "deploy": "vite build && echo 'cards.u-plate.com' > ./dist/CNAME && gh-pages -d dist"
+    "deploy": "vite build && echo 'contest.u-plate.com' > ./dist/CNAME && gh-pages -d dist"
   },
   "dependencies": {
     "react": "^18.3.1",
