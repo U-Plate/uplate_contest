@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useWebHaptics } from "web-haptics/react";
+import { useContests } from "../ContestsContext";
 
 export default function ContestTile({ contestId, onLoaded }) {
   const [contest, setContest] = useState(null);
+  const [email, setEmail] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [joinError, setJoinError] = useState(null);
+  const { getContestById, joinContest } = useContests();
   const { trigger } = useWebHaptics();
   const APP_STORE_IOS = "https://apps.apple.com/us/app/uplate/id6752828206";
   const APP_STORE_ANDROID =
@@ -13,30 +18,46 @@ export default function ContestTile({ contestId, onLoaded }) {
     return /android/i.test(ua);
   }
 
-  function enterContest() {
-    trigger("medium");
-    const storeLink = isAndroid() ? APP_STORE_ANDROID : APP_STORE_IOS;
-    window.open(storeLink, "_blank");
+  async function enterContest() {
+    setJoinError(null);
+    if (!email) {
+      setJoinError("Please enter an email to join the contest.");
+      return;
+    }
+    setJoining(true);
+    try {
+      await joinContest(contestId, email);
+      trigger("medium");
+      const storeLink = isAndroid() ? APP_STORE_ANDROID : APP_STORE_IOS;
+      window.open(storeLink, "_blank");
+    } catch (err) {
+      console.error(err);
+      setJoinError("Failed to join contest. Please try again.");
+    } finally {
+      setJoining(false);
+    }
   }
   useEffect(() => {
     let mounted = true;
     setContest(null);
 
     // Simulate a fetch for contest data
-    const timer = setTimeout(() => {
-      if (!mounted) return;
-      const data = {
-        id: contestId,
-        title: `Monster Raffle`,
-        description: `Use UPlate for 1 day for a chance to win a pallet of Monster Energy drinks!`,
-      };
-      setContest(data);
-      if (typeof onLoaded === "function") onLoaded();
-    }, 500);
+    getContestById(contestId)
+      .then((data) => {
+        if (mounted) {
+          setContest(data);
+          onLoaded?.();
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setContest({ title: "Contest Not Found", description: "" });
+          onLoaded?.();
+        }
+      });
 
     return () => {
       mounted = false;
-      clearTimeout(timer);
     };
     // Intentionally only depend on contestId so a parent re-render doesn't restart the timer
   }, [contestId]);
@@ -54,16 +75,36 @@ export default function ContestTile({ contestId, onLoaded }) {
           <h2 className="contest-title">{contest.title}</h2>
           <p className="contest-desc">{contest.description}</p>
           <input
-            type="text"
+            type="email"
             className="contest-input"
             placeholder="Enter your email to enter"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             onClick={() => trigger("light")}
+            disabled={joining}
           />
+          {joinError && (
+            <p className="contest-error" role="alert">
+              {joinError}
+            </p>
+          )}
           <p className="contest-warning">
             Use the same email when making an account on the app!
           </p>
-          <button className="contest-button" onClick={enterContest}>
-            Enter Contest
+          <button
+            className="contest-button"
+            onClick={enterContest}
+            disabled={joining}
+            aria-busy={joining}
+          >
+            {joining ? (
+              <>
+                <div className="spinner" role="img" aria-label="Joining" />
+                Joining…
+              </>
+            ) : (
+              "Enter Contest"
+            )}
           </button>
         </>
       )}
