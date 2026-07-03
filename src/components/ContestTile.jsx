@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useWebHaptics } from "web-haptics/react";
 import { useContests } from "../ContestsContext";
 
@@ -9,6 +10,8 @@ export default function ContestTile({ contestId, onLoaded }) {
   const [joinError, setJoinError] = useState(null);
   const { getContestById, joinContest } = useContests();
   const { trigger } = useWebHaptics();
+  const [searchParams] = useSearchParams();
+  const referredBy = searchParams.get("referredBy") || undefined;
   const APP_STORE_IOS = "https://apps.apple.com/us/app/uplate/id6752828206";
   const APP_STORE_ANDROID =
     "https://play.google.com/store/apps/details?id=com.njr.boilerFuel";
@@ -26,7 +29,7 @@ export default function ContestTile({ contestId, onLoaded }) {
     }
     setJoining(true);
     try {
-      await joinContest(contestId, email);
+      await joinContest(contestId, email.trim(), referredBy);
       trigger("medium");
       const storeLink = isAndroid() ? APP_STORE_ANDROID : APP_STORE_IOS;
       window.open(storeLink, "_blank");

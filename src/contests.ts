@@ -26,14 +26,20 @@ export const contestsApi = {
   /** GET /:school/restaurants/:id */
   getById: async (id: string) => {
     const data = await api.get<ApiContest>(
-      `/contests/${id}`,
+      `/contests/${encodeURIComponent(id)}`,
     );
     return fromApi(data);
   },
 
-  joinContest: async (id: string, email: string) => {
-    await api.post(`/contests/joinContest?contestId=${id}&contestantEmail=${email}`, {});
-  }
+  joinContest: async (id: string, email: string, referredByEmail?: string) => {
+    const params = new URLSearchParams({ contestId: id, contestantEmail: email });
+    if (referredByEmail) params.set("referredByEmail", referredByEmail);
+    await api.post(`/contests/joinContest?${params.toString()}`, {});
+  },
 
+  createReferrer: async (id: string, email: string, name: string) => {
+    const params = new URLSearchParams({ contestId: id, email, name });
+    await api.post(`/contests/createReferrer?${params.toString()}`, {});
+  },
 
 };

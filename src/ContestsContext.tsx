@@ -6,9 +6,10 @@ import React, { createContext, useContext,  type ReactNode } from 'react';
 
 
 interface ContestsContextType {
-  
+
   getContestById: (id: string) => Promise<Contest | undefined>;
-  joinContest: (id: string, email: string) => Promise<void>;
+  joinContest: (id: string, email: string, referredByEmail?: string) => Promise<void>;
+  createReferrer: (id: string, email: string, name: string) => Promise<void>;
 }
 
 const ContestsContext = createContext<ContestsContextType | undefined>(undefined);
@@ -21,19 +22,21 @@ const ApiContestsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return contest;
   };
 
-  const joinContest = async (id: string, email: string) => {
-    await contestsApi.joinContest(id, email);
+  const joinContest = async (id: string, email: string, referredByEmail?: string) => {
+    await contestsApi.joinContest(id, email, referredByEmail);
   }
 
-  
+  const createReferrer = async (id: string, email: string, name: string) => {
+    await contestsApi.createReferrer(id, email, name);
+  }
 
 
   return (
     <ContestsContext.Provider
       value={{
-       
         getContestById,
         joinContest,
+        createReferrer,
       }}
     >
       {children}
