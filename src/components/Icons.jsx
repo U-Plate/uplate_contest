@@ -38,6 +38,48 @@ export const GlobeIcon = (props) => (
   </svg>
 );
 
+const strokeProps = {
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "1.9",
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": "true",
+};
+
+/** Fork + knife — personalized campus dining */
+export const PlateIcon = (props) => (
+  <svg {...strokeProps} {...props}>
+    <path d="M6 2.5v6.5a2.6 2.6 0 0 0 5.2 0V2.5" />
+    <path d="M8.6 9v12.5" />
+    <path d="M18 21.5V3c2 1.7 2.8 4.3 2.8 6.7 0 2.1-1.1 3.5-2.8 3.9" />
+  </svg>
+);
+
+/** Funnel — filter by dietary needs */
+export const FilterIcon = (props) => (
+  <svg {...strokeProps} {...props}>
+    <path d="M3.5 5h17l-6.5 7.5v5.9a1 1 0 0 1-.55.9l-3 1.5a1 1 0 0 1-1.45-.9V12.5L3.5 5Z" />
+  </svg>
+);
+
+/** Target — calorie and macro goals */
+export const TargetIcon = (props) => (
+  <svg {...strokeProps} {...props}>
+    <circle cx="12" cy="12" r="8.5" />
+    <circle cx="12" cy="12" r="4.5" />
+    <circle cx="12" cy="12" r="1" fill="currentColor" />
+  </svg>
+);
+
+/** Check — effortless logging */
+export const CheckIcon = (props) => (
+  <svg {...strokeProps} strokeWidth="2.4" {...props}>
+    <path d="m4.5 12.5 5 5 10-11" />
+  </svg>
+);
+
 export const ChevronIcon = (props) => (
   <svg
     viewBox="0 0 24 24"

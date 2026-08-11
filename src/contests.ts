@@ -13,11 +13,12 @@ type ApiContest = Omit<Contest, "startDate" | "endDate"> & {
 
 function fromApi(r: ApiContest): Contest {
   console.log("Parsing contest from API:", r);
-  const { startDate, endDate, ...rest } = r;
+  const { startDate, endDate, type, ...rest } = r;
   return {
     ...rest,
     startDate: new Date(startDate),
     endDate: new Date(endDate),
+    type: type === "referral" ? "referral" : "marketing",
   } as Contest;
 }
 
@@ -37,8 +38,13 @@ export const contestsApi = {
     await api.post(`/contests/joinContest?${params.toString()}`, {});
   },
 
-  createReferrer: async (id: string, email: string, name: string) => {
-    const params = new URLSearchParams({ contestId: id, email, name });
+  createReferrer: async (
+    id: string,
+    email: string,
+    name: string,
+    instagramHandle: string,
+  ) => {
+    const params = new URLSearchParams({ contestId: id, email, name, instagramHandle });
     await api.post(`/contests/createReferrer?${params.toString()}`, {});
   },
 

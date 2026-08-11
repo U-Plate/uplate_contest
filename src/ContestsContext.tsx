@@ -9,7 +9,7 @@ interface ContestsContextType {
 
   getContestById: (id: string) => Promise<Contest | undefined>;
   joinContest: (id: string, email: string, referredByEmail?: string) => Promise<void>;
-  createReferrer: (id: string, email: string, name: string) => Promise<void>;
+  createReferrer: (id: string, email: string, name: string, instagramHandle: string) => Promise<void>;
 }
 
 const ContestsContext = createContext<ContestsContextType | undefined>(undefined);
@@ -26,8 +26,8 @@ const ApiContestsProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await contestsApi.joinContest(id, email, referredByEmail);
   }
 
-  const createReferrer = async (id: string, email: string, name: string) => {
-    await contestsApi.createReferrer(id, email, name);
+  const createReferrer = async (id: string, email: string, name: string, instagramHandle: string) => {
+    await contestsApi.createReferrer(id, email, name, instagramHandle);
   }
 
 

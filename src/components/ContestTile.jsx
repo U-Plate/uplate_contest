@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useWebHaptics } from "web-haptics/react";
 import { useContests } from "../ContestsContext";
+import ReferralPitch from "./ReferralPitch.jsx";
+import { firstName } from "../referrerName.js";
 
 export default function ContestTile({ contestId, onLoaded }) {
   const [contest, setContest] = useState(null);
@@ -12,6 +14,7 @@ export default function ContestTile({ contestId, onLoaded }) {
   const { trigger } = useWebHaptics();
   const [searchParams] = useSearchParams();
   const referredBy = searchParams.get("referredBy") || undefined;
+  const referrerName = firstName(searchParams.get("ref"));
   const APP_STORE_IOS = "https://apps.apple.com/us/app/uplate/id6752828206";
   const APP_STORE_ANDROID =
     "https://play.google.com/store/apps/details?id=com.njr.boilerFuel";
@@ -24,7 +27,11 @@ export default function ContestTile({ contestId, onLoaded }) {
   async function enterContest() {
     setJoinError(null);
     if (!email) {
-      setJoinError("Please enter an email to join the contest.");
+      setJoinError(
+        contest?.type === "referral"
+          ? "Please enter an email to continue."
+          : "Please enter an email to join the contest.",
+      );
       return;
     }
     setJoining(true);
@@ -35,7 +42,11 @@ export default function ContestTile({ contestId, onLoaded }) {
       window.open(storeLink, "_blank");
     } catch (err) {
       console.error(err);
-      setJoinError("Failed to join contest. Please try again.");
+      setJoinError(
+        contest?.type === "referral"
+          ? "Something went wrong. Please try again."
+          : "Failed to join contest. Please try again.",
+      );
     } finally {
       setJoining(false);
     }
@@ -65,9 +76,14 @@ export default function ContestTile({ contestId, onLoaded }) {
     // Intentionally only depend on contestId so a parent re-render doesn't restart the timer
   }, [contestId]);
 
+  const isReferral = contest?.type === "referral";
+
   // Always render a tile — show a spinner while loading.
   return (
-    <section className="contest-tile" aria-live="polite">
+    <section
+      className={`contest-tile${isReferral ? " contest-tile--pitch" : ""}`}
+      aria-live="polite"
+    >
       {!contest ? (
         <div className="spinner-wrap" aria-hidden="true">
           <div className="spinner" role="img" aria-label="Loading" />
@@ -75,12 +91,18 @@ export default function ContestTile({ contestId, onLoaded }) {
         </div>
       ) : (
         <>
-          <h2 className="contest-title">{contest.title}</h2>
-          <p className="contest-desc">{contest.description}</p>
+          {isReferral ? (
+            <ReferralPitch referrerName={referrerName} />
+          ) : (
+            <>
+              <h2 className="contest-title">{contest.title}</h2>
+              <p className="contest-desc">{contest.description}</p>
+            </>
+          )}
           <input
             type="email"
             className="contest-input"
-            placeholder="Enter your email to enter"
+            placeholder={isReferral ? "Your email" : "Enter your email to enter"}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onClick={() => trigger("light")}
@@ -92,10 +114,12 @@ export default function ContestTile({ contestId, onLoaded }) {
             </p>
           )}
           <p className="contest-warning">
-            Use the same email when making an account on the app!
+            {isReferral
+              ? "Use this same email in the app."
+              : "Use the same email when making an account on the app!"}
           </p>
           <button
-            className="contest-button"
+            className={`contest-button${isReferral ? " contest-button--pitch" : ""}`}
             onClick={enterContest}
             disabled={joining}
             aria-busy={joining}
@@ -103,8 +127,10 @@ export default function ContestTile({ contestId, onLoaded }) {
             {joining ? (
               <>
                 <div className="spinner" role="img" aria-label="Joining" />
-                Joining…
+                {isReferral ? "Opening…" : "Joining…"}
               </>
+            ) : isReferral ? (
+              "Get the free app"
             ) : (
               "Enter Contest"
             )}
